@@ -1,0 +1,1 @@
+from funkyprompt.core.AbstractModel import AbstractModel

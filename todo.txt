@@ -1,0 +1,6 @@
+- setup object tests 
+  - pyarrow typing
+  - sql typing
+  - 
+
+- Ingest and read and query types is the core use case+
