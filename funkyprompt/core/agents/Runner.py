@@ -7,7 +7,7 @@ If this goes above 200 lines of codes we have failed!
 
 from funkyprompt.core import AbstractModel
 from funkyprompt.core.functions import FunctionCall, FunctionManager
-from funkyprompt.services.models import model_client_from_context
+from funkyprompt.services.models import language_model_client_from_context
 from funkyprompt.core import utils
 from funkyprompt.core.agents import (
     CallingContext,
@@ -131,7 +131,7 @@ class Runner:
         """
 
         """setup all the bits before running the loop"""
-        self.model: LanguageModel = model_client_from_context(context)
+        lm_client: LanguageModel = language_model_client_from_context(context)
         self._context = context
         self.setup_messages(question)
 
@@ -139,13 +139,13 @@ class Runner:
         for _ in range(context.max_iterations):
             response = None
             """call the model with messages and function + our system context"""
-            response = self.model(
+            response = lm_client(
                 messages=self.messages,
                 context=context,
                 functions=self.functions,
             )
             if isinstance(response, FunctionCall):
-                """call one or more funcs and update messages"""
+                """call one or more functions and update messages"""
                 self.invoke(response)
                 continue
             if response is not None:

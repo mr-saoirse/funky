@@ -5,6 +5,22 @@ These messages may need to be tested for all API formats
 import typing
 import json
 from funkyprompt.core.agents import CallingContext
+from funkyprompt.core import AbstractModel
+
+
+def structure_question(
+    question: str, model: AbstractModel, context: CallingContext = None
+) -> typing.List[dict]:
+    """Prompt building in `funkyprompt` is governed by models or types. A question is injected into a scaffold based on the type
+    For language models we can construct a set of one or more messages using different roles.
+    One large blob in a question can work but its often sensible to split fragments by role
+
+    Args:
+        question (str): the users question
+        model (AbstractModel): the model used to generate the plan
+        context (CallingContext, optional): context is used to determine the model provider and other session context. Defaults to None.
+    """
+    return []
 
 
 def format_function_response_data(

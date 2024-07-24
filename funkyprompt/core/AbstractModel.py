@@ -1,6 +1,7 @@
 from pydantic import BaseModel, create_model, Field
 import uuid
 import typing
+from funkyprompt.core.types import inspection
 
 """
 names are always unique in funkyprompt for key-value entity lookups
@@ -129,6 +130,20 @@ class AbstractModel(BaseModel):
         data = {k: check_complex(v) for k, v in data.items() if k in fields}
 
         return data
+
+    """
+    INSPECTION
+    __________
+    """
+
+    @classmethod
+    def get_class_and_instance_methods(cls):
+        """returns the methods on the type that we care about"""
+        return inspection.get_class_and_instance_methods(cls)
+
+    """
+    ----------
+    """
 
 
 class AbstractEntity(AbstractModel):

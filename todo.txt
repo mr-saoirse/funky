@@ -4,3 +4,10 @@
   - 
 
 - Ingest and read and query types is the core use case+
+
+- add an api sample too - this can be used to call the agent but also provide test endpoints for the Function model
+
+- promote on slack channles, medium, substack, discords 
+
+questions
+- pros and cons of supporting both class and instance methods

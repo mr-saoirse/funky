@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 pydantic = "^2.8.2"
-psycopg2-binary = "loguru"
+docstring-parser = "^0.16"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
