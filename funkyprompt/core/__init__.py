@@ -1,5 +1,4 @@
 from funkyprompt.core.AbstractModel import AbstractModel, AbstractEntity
-from funkyprompt.core.functions import Function
 
 
 def load_entities():
@@ -19,3 +18,6 @@ def load_entities():
     entities = [e for e in entities if _not_private(e)]
 
     return entities
+
+
+from funkyprompt.core.utils import logger

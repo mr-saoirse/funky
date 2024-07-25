@@ -56,6 +56,7 @@ class DefaultAgentCore(AbstractModel):
         namespace: str = "core"
         description: str = AGENT_CORE_DESCRIPTION
 
+    @classmethod
     def describe_images(self, images: typing.List[str], question: str = None) -> dict:
         """describe a set of using the default LLM and an optional prompt/question
 
@@ -65,6 +66,7 @@ class DefaultAgentCore(AbstractModel):
         """
         pass
 
+    @classmethod
     def lookup_entity(self, keys: str | typing.List[str]) -> typing.List[dict]:
         """Given one or more entity keys, lookup the entity details
 
@@ -74,3 +76,16 @@ class DefaultAgentCore(AbstractModel):
         Returns: a list of typed entities
         """
         pass
+
+    @classmethod
+    def funky_prompt_codebase(self, questions: str):
+        """ask questions about the codebase aka library
+
+        Args:
+            questions (str): provide one or more questions to ask
+        """
+        from funkyprompt.core import load_entities
+
+        print(f"funky_prompt_codebase/{questions=}")
+
+        return {"questions": questions, "the following entities exist": load_entities()}

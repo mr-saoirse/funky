@@ -9,6 +9,9 @@ from funkyprompt.core.agents import CallingContext
 class Message(BaseModel):
     role: str
     content: str | dict
+    name: typing.Optional[str] = Field(
+        description="for example function names", default=None
+    )
 
 
 class UserMessage(Message):
@@ -43,7 +46,7 @@ class MessageStack(BaseModel):
         description="Listing function names can be a useful hint", default_factory=list
     )
 
-    user_question: typing.Optional[str] = Field(
+    question: typing.Optional[str] = Field(
         description="The users question", default=None
     )
 
@@ -94,7 +97,8 @@ class MessageStack(BaseModel):
             )
 
         """finally add the users question"""
-        messages.append(UserMessage(content=values.get("question")))
+        if values.get("question"):
+            messages.append(UserMessage(content=values.get("question")))
 
         values["messages"] = messages
 
@@ -106,15 +110,18 @@ class MessageStack(BaseModel):
         data["messages"] = []
         return MessageStack(model=cls.model, current_date=cls.current_date)
 
-    def add(cls, message: Message):
+    def add(cls, message: Message | dict):
         """augment the message and retain all the other stuff"""
+        if isinstance(message, dict):
+            message = Message(**message)
         messages = cls.messages
-        messages = messages.append(message)
+        messages.append(message)
         data = dict(vars(cls))
-        data["message"] = messages
+        data["messages"] = messages
+
         return MessageStack(**data)
 
-    def add_system_message(cls, data: str | dict):
+    def add_system_message(cls, data: str):
         """add string or dict content as system message"""
         return cls.add(SystemMessage(content=data))
 
@@ -140,7 +147,7 @@ class MessageStack(BaseModel):
     @classmethod
     def format_function_response_data(
         cls, name: str, data: typing.Any, context: CallingContext = None
-    ) -> dict:
+    ) -> Message:
         """format the function response for the agent - essentially just a json dump
 
         Args:
@@ -151,10 +158,10 @@ class MessageStack(BaseModel):
         Returns: formatted messages for agent as a dict
         """
 
-        return {
-            "role": "function",
-            "name": f"{str(name)}",
-            "content": json.dumps(
+        return Message(
+            role="function",
+            name=f"{str(name)}",
+            content=json.dumps(
                 {
                     # do we need to be this paranoid most of the time?? this is a good label to point later stages to the results
                     "about-these-data": "here are some data that may or may not contain the answer to your question - please review it carefully",
@@ -162,12 +169,12 @@ class MessageStack(BaseModel):
                 },
                 default=str,
             ),
-        }
+        )
 
     @classmethod
     def format_function_response_type_error(
         cls, name: str, ex: Exception, context: CallingContext = None
-    ) -> dict:
+    ) -> Message:
         """type errors imply the function was incorrectly called and the agent should try again
 
         Args:
@@ -177,15 +184,15 @@ class MessageStack(BaseModel):
 
         Returns: formatted error messages for agent as a dict
         """
-        return {
-            "role": "system",
-            "name": f"{str(name.replace('.','_'))}",
-            "content": f"""You have called the function incorrectly - try again {ex}""",
-        }
+        return Message(
+            role="system",
+            name=f"{str(name.replace('.','_'))}",
+            content=f"""You have called the function incorrectly - try again {ex}""",
+        )
 
     def format_function_response_error(
         name: str, ex: Exception, context: CallingContext = None
-    ) -> dict:
+    ) -> Message:
         """general errors imply something wrong with the function call
 
         Args:
@@ -196,13 +203,13 @@ class MessageStack(BaseModel):
         Returns: formatted error messages for agent as a dict
         """
 
-        return {
-            "role": "system",
-            "name": f"{str(name.replace('.','_'))}",
-            "content": f"""This function failed - you should try different arguments or a different function. - {ex}. 
+        return Message(
+            role="system",
+            name=f"{str(name.replace('.','_'))}",
+            content=f"""This function failed - you should try different arguments or a different function. - {ex}. 
                         If not data found you must search for another function if you can to answer the users question. 
                         Otherwise check the error and consider your input parameters """,
-        }
+        )
 
     """smart pruning of messages"""
 

@@ -1,12 +1,11 @@
 from funkyprompt.core import AbstractModel
-from funkyprompt.core.functions import Function
-from funkyprompt.services.models import language_model_client_from_context
 from funkyprompt.core.agents import (
     CallingContext,
     MessageStack,
     LanguageModel,
     Plan,
 )
+from ..functions import Function
 import typing
 
 
@@ -27,6 +26,9 @@ class FunctionManager:
     def __getitem__(self, key):
         return self._functions.get(key)
 
+    def __setitem__(self, key, value):
+        self._functions[key] = value
+
     def register(self, model: AbstractModel, include_function_search: bool = False):
         """register the functions of the model
         When registration is done, the functions are added to the stack of functions a runner can use
@@ -38,7 +40,7 @@ class FunctionManager:
         for f in model.get_class_and_instance_methods():
             self.add_function(f)
 
-    def add_function(self, f: typing.Callable | Function):
+    def add_function(self, f: typing.Callable | "Function"):
         """A callable function or Function type can be added to available functions.
         The callable is a python instance function that can be wrapped in a Function type
         or the Function can type can be added directly.
@@ -65,6 +67,8 @@ class FunctionManager:
         """
 
         """determine the model from context or default"""
+        from funkyprompt.services.models import language_model_client_from_context
+
         lm_client: LanguageModel = language_model_client_from_context(context)
 
         """there are no functions in this context as we want a direct response from context"""
@@ -113,6 +117,6 @@ class FunctionManager:
         return entity_store(Function).run_search(question)
 
     @property
-    def functions(self) -> dict:
+    def functions(self) -> typing.Dict[str, Function]:
         """provides a map of functions"""
         return self._functions

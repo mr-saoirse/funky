@@ -9,12 +9,12 @@ In this file there are some function related helper types
 4. Function: The main class represents a Function entity 
 """
 
-from funkyprompt.core import AbstractEntity
-from funkyprompt.core.agents import LanguageModelProviders
 from pydantic import Field, BaseModel, PrivateAttr, model_validator, model_serializer
+from funkyprompt.core import AbstractEntity
 from funkyprompt.core import types as core_types, AbstractEntity
 from funkyprompt.core.types.inspection import resolve_signature_types, TypeInfo
 from funkyprompt.core.fields.annotations import OpenAIEmbeddingField
+from funkyprompt import LanguageModelProviders
 import docstring_parser
 import typing
 import re
@@ -34,9 +34,9 @@ With this information a language model can plan over functions and invoke functi
 """
 
 
-class FunctionCall:
+class FunctionCall(BaseModel):
     name: str
-    args: str | dict
+    arguments: str | dict
 
 
 class FunctionParameter(BaseModel):
@@ -112,7 +112,7 @@ class FunctionMetadataParser(BaseModel):
 
         """for now use the external library or add custom parsers"""
 
-        def s_combine(l):
+        def s_combine(*l):
             return "\n".join(i for i in l if i)
 
         p = docstring_parser.parse(fn.__doc__)
@@ -180,17 +180,17 @@ class Function(AbstractEntity):
         https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
         """
 
-        """parameters"""
-        props = [p.to_json_spec(**kwargs) for p in cls.parameters]
+        """parameters - a map of stff"""
+        props = {p.name: p.to_json_spec(**kwargs) for p in cls.parameters}
         """body - we parse the name but this must marry up with what we use elsewhere"""
         name = re.sub(REGEX_ALLOW_FUNCTION_NAMES, "", cls.name)
         return {
-            "type": "function",
-            "function": {
-                "name": name,
-                "description": cls.description[:MAX_FUNCTION_DESCRIPTION_LENGTH],
-                "parameters": {"type": "object", "properties": props},
-            },
+            # "type": "function",
+            # "function": {
+            "name": name,
+            "description": cls.description[:MAX_FUNCTION_DESCRIPTION_LENGTH],
+            "parameters": {"type": "object", "properties": props},
+            # },
         }
 
     @classmethod
@@ -266,6 +266,9 @@ class Function(AbstractEntity):
             try:
                 return function(*args, **kwargs)
             except:
+                import traceback
+
+                print(traceback.format_exc())
                 # undecided about bound versus unbound functions
                 return function.__func__(*args, **kwargs)
         raise Exception(

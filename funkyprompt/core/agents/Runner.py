@@ -6,7 +6,6 @@ If this goes above 200 lines of codes we have failed!
 """
 
 from funkyprompt.core import AbstractModel
-from funkyprompt.core.functions import FunctionCall, FunctionManager
 from funkyprompt.services.models import language_model_client_from_context
 from funkyprompt.core import utils
 from funkyprompt.core.agents import (
@@ -15,6 +14,7 @@ from funkyprompt.core.agents import (
     LanguageModel,
 )
 from . import MessageStack
+from . import FunctionCall, FunctionManager, Function
 import typing
 
 
@@ -59,7 +59,13 @@ class Runner:
         Args:
             question (str): provide detailed questions to guide the planner
         """
-        plan = self._function_manager.plan(questions)
+
+        utils.logger.debug(f"help/{questions=}")
+
+        try:
+            plan = self._function_manager.plan(questions)
+        except:
+            return {"message": "planning pending - i suggest you use world knowledge"}
 
         """describe the plan context e.g. its a plan but you need to request the functions and do the thing -> update message stack"""
 
@@ -75,7 +81,7 @@ class Runner:
 
         try:
             """try call the function - assumes its some sort of json thing that comes back"""
-            data = f(**function_call.args)
+            data = f(**function_call.arguments) or {}
             data = MessageStack.format_function_response_data(
                 function_call.name, data, self._context
             )
@@ -83,19 +89,21 @@ class Runner:
             its important to make sure the format coincides with the language model being used in context
             """
         except TypeError as tex:
+            utils.logger.warning(f"Error calling function {tex}")
             data = MessageStack.format_function_response_type_error(
                 function_call.name, tex, self._context
             )
         except Exception as ex:
+            utils.logger.warning(f"Error calling function {ex}")
             data = MessageStack.format_function_response_error(
                 function_call.name, ex, self._context
             )
 
         """update messages with data if we can or add error messages to notify the language model"""
-        self.messages.add_system_message(data)
+        self.messages.add(data)
 
     @property
-    def functions(self):
+    def functions(self) -> typing.Dict[str, Function]:
         """provide access to the function manager's functions"""
         return self._function_manager.functions
 
@@ -118,11 +126,12 @@ class Runner:
         """run the agent loop to completion"""
         for _ in range(context.max_iterations):
             response = None
+            function_descriptions = [f.to_json_spec() for f in self.functions.values()]
             """call the model with messages and function + our system context"""
             response = lm_client(
-                messages=self.messages,
+                messages=self.messages.model_dump(),
                 context=context,
-                functions=self.functions,
+                functions=function_descriptions,
             )
             if isinstance(response, FunctionCall):
                 """call one or more functions and update messages"""
@@ -147,8 +156,9 @@ class Runner:
         """
         pass
 
-    def __call__(self, question: str, context: CallingContext):
+    def __call__(self, question: str, context: CallingContext = None):
         """
         Ask a question to kick of the agent loop
         """
+        context = context or CallingContext()
         return self.run(question, context)

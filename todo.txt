@@ -9,6 +9,11 @@
 
 - promote on slack channles, medium, substack, discords 
 
+- stuff like DEFAULT_MODEL should be in the env
+
+- keep the main points super linear and simple and then create a 100 things you can do with funkyprompt list
+
+
 questions
 - pros and cons of supporting both class and instance methods
 
@@ -23,3 +28,19 @@ protocol=ssh
 git config --list
 git config core.sshCommand 'ssh -i ~/.ssh/mr-saoirse'
 git config user.name "mr-saoirse"
+
+
+terms:
+- object oriented generation
+- object orienated guidance
+- typed guidnance or pydantic guidance 
+
+
+built in use cases
+- index codebase and ask questions about it
+- the world api general entity type
+- converstaions as entities
+- plans as entities
+- adding your own library entities
+
+

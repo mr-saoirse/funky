@@ -98,3 +98,27 @@ Step 4
 
 ## Funkybrain
 A reference app that riffs on the funkyprompt. This does some useful things that you would need to build anything ore serious such as scraping and integration tools or just more types and examples in general.
+
+
+From the agent
+
+``` 
+A Funkyprompt agent is a type of AI agent designed to handle complex tasks by leveraging a dynamic and modular approach to function execution and state management. Here are the key principles and features of a Funkyprompt agent:
+
+    Dynamic Function Execution: Funkyprompt agents can call various functions to answer user questions or perform tasks. These functions are loaded on demand and can be searched and managed dynamically.
+
+    State Management: The agent outsources stateful jobs to manage the message stack (a list of messages) and the function stack. This allows the agent to maintain context and handle multi-step workflows effectively.
+
+    Object-Oriented Generation Paradigm: Agents are treated as objects that contain methods, fields, and metadata. This encapsulation allows for rich semantics and access to functions within a single object.
+
+    Declarative Approach: The agent's behavior, goals, and functions are defined declaratively within the object. This makes it easier to understand and manage the agent's capabilities and responses.
+
+    Response Schema: Agents can provide a response schema to guide the format of their responses, ensuring consistency and clarity in communication.
+
+    Multimodal Applications: Funkyprompt agents can handle multimodal tasks, such as image description, by calling appropriate functions.
+
+    Lightweight and Intuitive: The framework is designed to be lightweight, with the runner being a simple shell of fewer than 200 lines of code. This simplicity makes it easy to build and extend complex agent systems.
+
+In summary, a Funkyprompt agent is a versatile and modular AI agent that can dynamically manage functions and state to handle a wide range of tasks efficiently.
+
+```

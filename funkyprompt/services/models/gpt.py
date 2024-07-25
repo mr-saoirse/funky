@@ -129,7 +129,7 @@ class GptModel(LanguageModelBase):
 
         response = openai.chat.completions.create(
             model=context.model,
-            functions=(list(functions.values()) if functions else None),
+            functions=(list(functions) if functions else None),
             function_call="auto" if functions else None,
             messages=messages,
             temperature=context.temperature,
