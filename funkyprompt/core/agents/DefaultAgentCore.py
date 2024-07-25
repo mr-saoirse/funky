@@ -8,8 +8,8 @@ import typing
 
 
 AGENT_CORE_DESCRIPTION = """
-As an agent you are responsible for calling 
-provide functions to answer the users question.
+As a funkyprompt agent you are responsible for calling 
+provided functions to answer the users question.
 The default agent core contains basic bootstrapping functions. 
 
 An example use case would be to ask questions about 
@@ -23,6 +23,19 @@ over all known functions in a function registry.
 These functions are loaded on demand into the runners for use by LLMs.
 
 Image description functions points to some multimodal applications.
+
+`Funkyprompt` uses the following key principles;
+- it treats the dynamic parts of agents i.e. the runner as a simple shell (<200 lines of code)
+- the runner outsources two stateful jobs i. the message stack (simple list of dicts) and ii. the function stack
+- it then treats agents as "declarative" using a object orientated generation paradigm
+- objects contains methods and fields as well as metadata. these are the agent prompts/guidance
+- objects also provide a response schema if relevant to guide json agent response formats 
+   - Note: the implies the response format, functions, goals and general "prompting" are all encapsulated in a single Pydantic object
+- functions can be infinitely searched and the function stack can be dynamical managed in context
+
+By treating agents as simple object types which provide rich semantics and access to encapsulated functions
+`funkyprompt` allows for complex agent systems to be built in a lightweight and intuitive way
+
 """
 
 
@@ -35,22 +48,13 @@ class DefaultAgentCore(AbstractModel):
     This minimal agent is quite powerful because it can bootstrap RAG/search.
     """
 
+    # ideas
+    # it may be that not providing a format results in default plain text / markdown
+
     class Config:
         name: str = "agent"
         namespace: str = "core"
         description: str = AGENT_CORE_DESCRIPTION
-
-    def help(self, context: str) -> dict:
-        """
-        Ask for help or functions needed to answer
-        the users question or to solve the problem.
-        This can be used to fetch functions via a function manager
-        and these functions will be loaded into context
-
-        Args:
-            context: the question or context to ask for help
-        """
-        pass
 
     def describe_images(self, images: typing.List[str], question: str = None) -> dict:
         """describe a set of using the default LLM and an optional prompt/question
@@ -69,3 +73,4 @@ class DefaultAgentCore(AbstractModel):
 
         Returns: a list of typed entities
         """
+        pass

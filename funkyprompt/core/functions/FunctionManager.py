@@ -3,7 +3,7 @@ from funkyprompt.core.functions import Function
 from funkyprompt.services.models import language_model_client_from_context
 from funkyprompt.core.agents import (
     CallingContext,
-    FormattedAgentMessages,
+    MessageStack,
     LanguageModel,
     Plan,
 )
@@ -71,8 +71,8 @@ class FunctionManager:
         functions = None
 
         """we can structure the messages from the question and typed model"""
-        messages = FormattedAgentMessages.structure_question(
-            question, model=Plan, context=context
+        messages = MessageStack(
+            question, model=Plan, language_model_provider=context.model
         )
 
         response: Plan = Plan.model_validate_json(

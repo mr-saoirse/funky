@@ -3,6 +3,7 @@ import typing
 from funkyprompt.core.agents import CallingContext
 from funkyprompt.core.functions import FunctionCall
 import json
+from . import LanguageModelBase
 
 
 def _get_function_call_or_stream(
@@ -97,7 +98,7 @@ def _get_function_call_or_stream(
         return response_message.content
 
 
-class GptModel:
+class GptModel(LanguageModelBase):
 
     def get_function_call_or_stream(
         self,
@@ -118,6 +119,7 @@ class GptModel:
         messages: typing.List[dict],
         context: CallingContext,
         functions: typing.Optional[dict] = None,
+        **kwargs
     ):
         """The run entry point for the agent model
         - calls the api

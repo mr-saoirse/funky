@@ -14,7 +14,8 @@ from funkyprompt.core.agents import (
     DefaultAgentCore,
     LanguageModel,
 )
-from . import FormattedAgentMessages
+from . import MessageStack
+import typing
 
 
 class Runner:
@@ -46,50 +47,23 @@ class Runner:
 
     def initialize(self):
         """register the functions and other metadata from the model"""
+
         self._context = None
-        """tbd how to get messages from the model
-           - these are fixed messages not changing in the loop"""
-        self._base_messages = []
         """register the model's functions which can include function search"""
         self._function_manager.register(self.model)
+        self._function_manager.add_function(self.help)
 
-    def setup_messages(self, question: str):
+    def help(self, questions: str | typing.List[str]):
+        """if you are stuck ask for help with very detailed questions to help the planner find resources for you.
+
+        Args:
+            question (str): provide detailed questions to guide the planner
         """
-        On every question asked of the instance, the messages are set up.
-        This function could be overridden as this largely determines behaviour
-        Note the context comes from models and data,
-        which should generally be more important in guidance
-        """
+        plan = self._function_manager.plan(questions)
 
-        def _as_sys(m):
-            return {"role": "system", "content": m}
+        """describe the plan context e.g. its a plan but you need to request the functions and do the thing -> update message stack"""
 
-        def _as_user(m):
-            return {"role": "user", "content": m}
-
-        self._last_question = question
-        self.messages = list(self._base_messages)
-
-        """update messages from context, model and question"""
-        self.messages.append(
-            _as_sys(self._context.plan or self.model.get_model_prompt())
-        )
-        """this is added because sometimes it screws up date based queries"""
-        self.messages.append(
-            _as_sys(
-                f"I observe the current date is {utils.dates.now()} so I should take that into account if asked questions about time",
-            )
-        )
-        """this is added because sometimes it seems to need this nudge (TODO:)"""
-        self.messages.append(
-            _as_user(
-                f"You can use the following functions by default {self.functions.keys()} any in some cases you may be able to search and load others",
-            )
-        )
-        """finally add the users question"""
-        self.messages.append(_as_user(question))
-
-        """when the loop runs, function responses will be appended to messages..."""
+        return plan
 
     def invoke(self, function_call: FunctionCall):
         """Invoke function(s) and parse results into messages
@@ -102,23 +76,23 @@ class Runner:
         try:
             """try call the function - assumes its some sort of json thing that comes back"""
             data = f(**function_call.args)
-            data = FormattedAgentMessages.format_function_response_data(
+            data = MessageStack.format_function_response_data(
                 function_call.name, data, self._context
             )
             """if there is an error, how you format the message matters - some generic ones are added
             its important to make sure the format coincides with the language model being used in context
             """
         except TypeError as tex:
-            data = FormattedAgentMessages.format_function_response_type_error(
+            data = MessageStack.format_function_response_type_error(
                 function_call.name, tex, self._context
             )
         except Exception as ex:
-            data = FormattedAgentMessages.format_function_response_error(
+            data = MessageStack.format_function_response_error(
                 function_call.name, ex, self._context
             )
 
         """update messages with data if we can or add error messages to notify the language model"""
-        self.messages.append(data)
+        self.messages.add_system_message(data)
 
     @property
     def functions(self):
@@ -133,7 +107,13 @@ class Runner:
         """setup all the bits before running the loop"""
         lm_client: LanguageModel = language_model_client_from_context(context)
         self._context = context
-        self.setup_messages(question)
+        self.messages = MessageStack(
+            model=self.model,
+            question=question,
+            current_date=utils.dates.now(),
+            function_names=self.functions.keys(),
+            language_model_provider=context.model,
+        )
 
         """run the agent loop to completion"""
         for _ in range(context.max_iterations):
@@ -155,6 +135,8 @@ class Runner:
         """fire telemetry"""
 
         """log questions to store unless disabled"""
+
+        self.dump()
 
         return response
 

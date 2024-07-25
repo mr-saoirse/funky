@@ -15,3 +15,11 @@ questions
 - dynamic typing is a good game to play where we can just talk to the agent and ingest structured things - i might riff on that for a bit
 - the other thing is init from a consuming library with a module of types
 - we should not add that many static types to funkpyrompt - just the core ones; plans, functions, convos, global-function   
+- multi function calls and when to do it
+
+git credential-osxkeychain erase
+host=github.com
+protocol=ssh
+git config --list
+git config core.sshCommand 'ssh -i ~/.ssh/mr-saoirse'
+git config user.name "mr-saoirse"

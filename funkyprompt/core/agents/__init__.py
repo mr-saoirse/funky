@@ -5,7 +5,7 @@ GPT_MINI = "gpt-4o-mini"
 from .CallingContext import CallingContext
 from .DefaultAgentCore import DefaultAgentCore
 from .AbstractLanguageModel import LanguageModel
-from . import FormattedAgentMessages
+from .MessageStack import MessageStack
 from .Plan import Plan
 from enum import Enum
 
