@@ -1,12 +1,12 @@
 from funkyprompt.core import AbstractModel
+from funkyprompt.core.functions import Function
+from funkyprompt.services.models import language_model_client_from_context
 from funkyprompt.core.agents import (
     CallingContext,
     FormattedAgentMessages,
     LanguageModel,
     Plan,
 )
-from funkyprompt.core.functions import Function
-from funkyprompt.services.models import language_model_client_from_context
 import typing
 
 
@@ -94,6 +94,10 @@ class FunctionManager:
         """
         pass
 
+    def reset_functions(self):
+        """hard reset on what we know about"""
+        self.functions = {}
+
     def search(self, question: str, limit: int = None, context: CallingContext = None):
         """search a deep function registry. The plan could be used to hold many functions in an in-memory/in-context registry.
         This as cost implications as the model must keep all functions in the context.
@@ -104,9 +108,9 @@ class FunctionManager:
             limit: (int): a limit of functions returned for consideration
             context (CallingContext, optional): context may provide options
         """
-        from funkyprompt.services.data import default_store
+        from funkyprompt.services import entity_store
 
-        return default_store.run_search(question, model=Function)
+        return entity_store(Function).run_search(question)
 
     @property
     def functions(self) -> dict:

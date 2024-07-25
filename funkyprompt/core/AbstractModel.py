@@ -23,18 +23,20 @@ class AbstractModel(BaseModel):
         description="A unique hash/uuid for the entity. The name can be hashed if its marked as the key",
     )
 
+    @classmethod
     def get_model_name(cls):
-        c = getattr(c, "Config", None)
+        c = getattr(cls, "Config", None)
         if c and getattr(c, "name", None):
-            return c.Config.name
+            return c.name
         """else infer from lib"""
         s = cls.model_json_schema(by_alias=False)
         return s.get("title", cls.__name__)
 
+    @classmethod
     def get_model_namespace(cls):
-        c = getattr(c, "Config", None)
+        c = getattr(cls, "Config", None)
         if c and getattr(c, "namespace", None):
-            return c.Config.namespace
+            return c.namespace
         """else infer from lib"""
         # convention
         namespace = cls.__module__.split(".")[-1]
@@ -44,11 +46,12 @@ class AbstractModel(BaseModel):
             else DEFAULT_NAMESPACE
         )
 
+    @classmethod
     def get_model_description(cls):
         """the description of the entity - import for prompting"""
-        c = getattr(c, "Config", None)
+        c = getattr(cls, "Config", None)
         if c and getattr(c, "description", None):
-            return c.Config.description
+            return c.description
 
     @classmethod
     def get_model_fullname(cls):
@@ -131,10 +134,33 @@ class AbstractModel(BaseModel):
 
         return data
 
+    @classmethod
+    def get_model_as_prompt(cls) -> str:
+        """the model as prompt provides a schema and also the description of the model
+        if the base class implements `_get_prompting_data` then data will be loaded into context
+        For example this is used in function planning
+
+        this is experimental and may not be a perfect abstraction
+        """
+        injected_data = ""
+        if getattr(cls, "_get_prompting_data", None) is not None:
+            injected_data = cls._get_prompting_data()
+
+        from funkyprompt.core.types.pydantic import get_pydantic_properties_string
+
+        return f"""## {cls.get_model_fullname()}
+    
+    *Description*: {cls.get_model_description()}
+    
+    *Field info*:
+    {get_pydantic_properties_string(cls)}
+    
+    {injected_data}
     """
-    INSPECTION
-    __________
-    """
+
+    #############
+    ##   INSPECTION
+    #############
 
     @classmethod
     def get_class_and_instance_methods(cls):
@@ -150,3 +176,18 @@ class AbstractEntity(AbstractModel):
     """the abstract entity is a sub class of model that admits a unique name"""
 
     name: str = Field(description="The name is unique for the entity", is_key=True)
+
+    @classmethod
+    def run_search(
+        cls, questions: str | typing.List[str], limit: int = None, **kwargs
+    ) -> typing.List[AbstractModel]:
+        """search the entity using the default store
+
+        Args:
+            questions (str | typing.List[str]): ask one or more questions - the more the better
+            limit (int, optional): provide an optional search limit. Defaults to None.
+        """
+
+        from funkyprompt.services import entity_store
+
+        return entity_store(cls).run_search(questions, limit, **kwargs)

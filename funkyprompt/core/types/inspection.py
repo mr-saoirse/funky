@@ -3,6 +3,7 @@ import types
 import typing
 from pydantic import BaseModel, Field
 from enum import Enum
+import importlib, pkgutil
 
 
 class TypeInfo(BaseModel):
@@ -94,4 +95,47 @@ def resolve_named_type(name: str, t: type, **kwargs):
         is_list=contains_list,
         input=t,
         enum_options=enum_options,
+    )
+
+
+def get_classes(
+    base_filter: type = None,
+    package="funkyprompt.core",
+    exclusions: typing.List[str] = None,
+) -> list[type]:
+    """recurse and get classes implementing a base class
+    we do some env stuff to make inspection work well and we should test for this e.g. dont load models and do not init singletons
+    """
+
+    exclusions = exclusions or []
+    classes_in_package = []
+    # Go through the modules in the package
+    for _importer, module_name, is_package in pkgutil.iter_modules(
+        importlib.import_module(package).__path__
+    ):
+        full_module_name = f"{package}.{module_name}"
+        if full_module_name in exclusions:
+            continue
+        # Recurse through any sub-packages
+        if is_package:
+            classes_in_subpackage = get_classes(
+                package=full_module_name, base_filter=base_filter
+            )
+            classes_in_package.extend(classes_in_subpackage)
+
+        # Load the module for inspection
+        module = importlib.import_module(full_module_name)
+
+        # Iterate through all the objects in the module and
+        # using the lambda, filter for class objects and only objects that exist within the module
+        for _name, obj in getmembers(
+            module,
+            lambda member, module_name=full_module_name: isclass(member)
+            and member.__module__ == module_name,
+        ):
+            classes_in_package.append(obj)
+    return (
+        classes_in_package
+        if not base_filter
+        else [c for c in classes_in_package if issubclass(c, base_filter)]
     )

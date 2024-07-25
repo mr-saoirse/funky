@@ -11,3 +11,7 @@
 
 questions
 - pros and cons of supporting both class and instance methods
+
+- dynamic typing is a good game to play where we can just talk to the agent and ingest structured things - i might riff on that for a bit
+- the other thing is init from a consuming library with a module of types
+- we should not add that many static types to funkpyrompt - just the core ones; plans, functions, convos, global-function   
