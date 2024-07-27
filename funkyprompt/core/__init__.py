@@ -1,4 +1,5 @@
 from funkyprompt.core.AbstractModel import AbstractModel, AbstractEntity
+from funkyprompt.core.ConversationModel import ConversationModel
 
 
 def load_entities():

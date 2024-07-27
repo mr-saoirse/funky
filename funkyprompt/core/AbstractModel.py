@@ -138,6 +138,16 @@ class AbstractModel(BaseModel):
         return data
 
     @classmethod
+    def get_embedding_fields(cls) -> typing.Dict[str, str]:
+        """returns the fields that have embeddings based on the attribute - uses our convention"""
+        needs_embeddings = {}
+        for k, v in cls.model_fields.items():
+            extras = getattr(v, "json_schema_extra", {}) or {}
+            if extras.get("embedding_provider"):
+                needs_embeddings[k] = f"{k}_embedding"
+        return needs_embeddings
+
+    @classmethod
     def get_model_as_prompt(cls) -> str:
         """the model as prompt provides a schema and also the description of the model
         if the base class implements `_get_prompting_data` then data will be loaded into context
@@ -173,6 +183,13 @@ class AbstractModel(BaseModel):
     """
     ----------
     """
+
+    @classmethod
+    def _register(cls):
+        """a not to be abused but convenient self-register in the core entity store"""
+        from funkyprompt.services import entity_store
+
+        return entity_store(cls)._create_model()
 
 
 class AbstractEntity(AbstractModel):

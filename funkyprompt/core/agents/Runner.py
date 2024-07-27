@@ -13,6 +13,9 @@ from funkyprompt.core.agents import (
     DefaultAgentCore,
     LanguageModel,
 )
+
+from funkyprompt.core import ConversationModel
+from funkyprompt.services import entity_store
 from . import MessageStack
 from . import FunctionCall, FunctionManager, Function
 import typing
@@ -145,16 +148,26 @@ class Runner:
 
         """log questions to store unless disabled"""
 
-        self.dump()
+        self.dump(question, response, context)
 
         return response
 
-    def dump(self):
+    def dump(self, questions: str, response: str, context: CallingContext):
         """dumps the messages and context to stores
         if the session is a typed objective this is updated in a slowly changing dimension
         generally audit all transactions unless disabled
         """
-        pass
+        from uuid import uuid4
+
+        default_id = str(uuid4())
+        entity_store(ConversationModel).update_records(
+            ConversationModel(
+                id=default_id,
+                user_id=context.username or "system",
+                objective_node_id=context.session_id,
+                content={"question": questions, response: response},
+            )
+        )
 
     def __call__(self, question: str, context: CallingContext = None):
         """

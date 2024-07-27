@@ -125,3 +125,24 @@ A Funkyprompt agent is a type of AI agent designed to handle complex tasks by le
 In summary, a Funkyprompt agent is a versatile and modular AI agent that can dynamically manage functions and state to handle a wide range of tasks efficiently.
 
 ```
+
+
+## Setting up postgres
+
+### pg_vector
+
+This just needs the extension and you can also check the [readme](https://github.com/pgvector/pgvector) for how this works. Cone and make the repo and
+```sql
+CREATE EXTENSION vector;
+```
+
+## AGE
+
+We also use AGE graph as both the graph database and a simple key-value or rather node lookup. All entities are registered as nodes.
+In future we may use a redis cache or something like that to take the load off.
+
+Using the Git repo or these [docs](https://age.apache.org/getstarted/quickstart/) again make the project and add the extension
+
+```sql
+CREATE EXTENSION age;
+```
