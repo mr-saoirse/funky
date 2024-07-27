@@ -2,6 +2,7 @@ from pydantic import BaseModel, create_model, Field
 import uuid
 import typing
 from funkyprompt.core.types import inspection
+from funkyprompt.core.types.sql import SqlHelper
 
 """
 names are always unique in funkyprompt for key-value entity lookups
@@ -14,7 +15,7 @@ DEFAULT_NAMESPACE = "default"
 
 class AbstractModel(BaseModel):
     class Config:
-        name: str = "AbstractModel"
+        name: str = "abstract_model"
         namespace: str = "core"
         description: str = "Provide a rich model description"
 
@@ -107,9 +108,11 @@ class AbstractModel(BaseModel):
         """convert the object to its pyarrow representation"""
         pass
 
-    def sql(cls):
+    @classmethod
+    def sql(cls) -> SqlHelper:
         """reference the sql helper"""
-        pass
+
+        return SqlHelper(cls)
 
     def db_dump(self):
         """serialize complex types as we need for DBs/Postgres

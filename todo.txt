@@ -13,6 +13,9 @@
 
 - keep the main points super linear and simple and then create a 100 things you can do with funkyprompt list
 
+- remember that this thing needs an ETL module and a personalization module
+
+- MORE CONTROL PVER POSTGRES TYPES IN FIELD DESC - helpers **PostgresOptions
 
 questions
 - pros and cons of supporting both class and instance methods

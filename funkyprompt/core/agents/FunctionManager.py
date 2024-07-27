@@ -114,7 +114,7 @@ class FunctionManager:
         """
         from funkyprompt.services import entity_store
 
-        return entity_store(Function).run_search(question)
+        return entity_store(Function).query(question)
 
     @property
     def functions(self) -> typing.Dict[str, Function]:

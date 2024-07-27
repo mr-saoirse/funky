@@ -96,6 +96,9 @@ Step 4
 - the data provider prompt pattern (llm as a judge is important here)
 - the small world chunking pattern
 
+secondary
+- the observer/mediator pattern
+
 ## Funkybrain
 A reference app that riffs on the funkyprompt. This does some useful things that you would need to build anything ore serious such as scraping and integration tools or just more types and examples in general.
 

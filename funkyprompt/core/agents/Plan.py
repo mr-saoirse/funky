@@ -145,6 +145,6 @@ class Plan(AbstractEntity):
             typing.List[dict]: a list of functions and their descriptions
         """
         from funkyprompt.services import entity_store
-        from funkyprompt.core import Function
+        from funkyprompt.core.functions import Function
 
-        return entity_store(Function).run_search(questions)
+        return entity_store(Function).query(questions)
