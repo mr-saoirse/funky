@@ -1,8 +1,9 @@
-from funkyprompt.core.AbstractModel import AbstractModel, AbstractEntity
+from funkyprompt.core.AbstractModel import AbstractModel, AbstractEntity, Field, typing
 from funkyprompt.core.ConversationModel import ConversationModel
+from funkyprompt.core.fields.annotations import OpenAIEmbeddingField
 
 
-def load_entities():
+def load_entities() -> typing.List[AbstractEntity]:
     from funkyprompt.core.types.inspection import get_classes
 
     entities = get_classes(AbstractEntity)

@@ -1,7 +1,7 @@
 """a map to json schema types for serialization"""
 
 import uuid
-
+import typing
 
 EMBEDDING_LENGTH_OPEN_AI = 1536
 

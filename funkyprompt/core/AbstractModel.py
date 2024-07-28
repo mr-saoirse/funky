@@ -1,8 +1,10 @@
-from pydantic import BaseModel, create_model, Field
+from pydantic import BaseModel, create_model, Field, model_validator
 import uuid
 import typing
 from funkyprompt.core.types import inspection
 from funkyprompt.core.types.sql import SqlHelper
+from funkyprompt.core.types.cypher import CypherHelper
+from funkyprompt.core.utils.ids import funky_id
 
 """
 names are always unique in funkyprompt for key-value entity lookups
@@ -114,6 +116,12 @@ class AbstractModel(BaseModel):
 
         return SqlHelper(cls)
 
+    @classmethod
+    def cypher(cls) -> CypherHelper:
+        """reference the cypher helper"""
+
+        return CypherHelper(cls)
+
     def db_dump(self):
         """serialize complex types as we need for DBs/Postgres
         - we do things like allow for config to turn fields off
@@ -193,9 +201,21 @@ class AbstractModel(BaseModel):
 
 
 class AbstractEntity(AbstractModel):
-    """the abstract entity is a sub class of model that admits a unique name"""
+    """the abstract entity is a sub class of model that admits a unique name0
+    - abstract entities are treated as graph nodes unless the config specifies exclude_from_graph=True
+
+    """
 
     name: str = Field(description="The name is unique for the entity", is_key=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _id(cls, values):
+        """"""
+
+        if not values.get("id"):
+            values["id"] = funky_id(values["name"])
+        return values
 
     @classmethod
     def run_search(
@@ -210,4 +230,4 @@ class AbstractEntity(AbstractModel):
 
         from funkyprompt.services import entity_store
 
-        return entity_store(cls).run_search(questions, limit, **kwargs)
+        return entity_store(cls).query(questions, limit, **kwargs)

@@ -1,3 +1,6 @@
+# https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
+
+
 import openai
 import typing
 from funkyprompt.core.agents import CallingContext

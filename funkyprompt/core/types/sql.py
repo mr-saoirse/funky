@@ -5,6 +5,7 @@ import psycopg2.extras
 import uuid
 from . import some_default_for_type
 from typing import get_type_hints
+from enum import Enum
 
 """special postgres attributes on pydantic fields
 
@@ -40,6 +41,21 @@ SELECT * FROM cypher('funkybrain', $$  CREATE (:label) $$) as (v agtype);
 
 
 """
+
+
+class VectorSearchOperator(Enum):
+    """
+    If vectors are normalized to length 1 (like OpenAI embeddings), use inner product for best performance.
+    see also ops
+    <~> 	Hamming distance
+    <%> 	Jaccard distance
+
+    """
+
+    L1 = " <+>"  # taxicab
+    L2 = "<->"  # euclidean
+    INNER_PRODUCT = "<#>"  # Neg inner product
+    COSINE = "<=>"
 
 
 class SqlHelper:
@@ -253,7 +269,7 @@ class SqlHelper:
         ```
         """
 
-        """todo - this needs to read the id key from the model"""
+        """TODO: the return can be efficient * for example pulls back embeddings which is almost never what you want"""
         field_list = cls.field_names
         """conventionally add in order anything that is added in upsert and missing"""
         for c in restricted_update_fields or []:
@@ -320,3 +336,10 @@ class SqlHelper:
             returning=returning,
             restricted_update_fields=field_names,
         )
+
+    def query_from_natural_language(
+        self,
+        question: str,
+    ):
+        """"""
+        pass

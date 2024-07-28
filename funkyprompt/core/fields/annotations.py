@@ -5,10 +5,24 @@ This supports stubbing patterns
 
 from pydantic import Field, BaseModel
 from functools import partial
+import typing
 
 """
 [A] Provide some common shorthands for field annotations used with pydantic objects
 """
+
+
+class SqlTypeFields(BaseModel):
+    """things like varchar lengths"""
+
+    varchar_length: typing.Optional[int] = Field(
+        default=None,
+        description="If a varchar length is used the field will be VARCHAR otherwise we might default to TEXT",
+    )
+    numeric_type: typing.Optional[tuple] = Field(
+        default=None,
+        description="Numeric types can be defined",
+    )
 
 
 def KeyField():

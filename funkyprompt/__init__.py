@@ -9,6 +9,7 @@ class LanguageModelProviders(Enum):
 import typing
 from funkyprompt.core.agents import CallingContext
 from funkyprompt.core import AbstractModel
+from funkyprompt import entities
 
 
 def run(

@@ -1,3 +1,7 @@
 {
-  "cSpell.words": ["Pydantic"]
+  "cSpell.words": [
+    "cypher",
+    "multimodel",
+    "Pydantic"
+  ]
 }

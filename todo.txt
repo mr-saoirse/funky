@@ -47,3 +47,4 @@ built in use cases
 - adding your own library entities
 
 
+OPTIONAL INSERALL [data-tools] -> duck | polars | lancedb 

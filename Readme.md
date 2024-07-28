@@ -127,22 +127,18 @@ In summary, a Funkyprompt agent is a versatile and modular AI agent that can dyn
 ```
 
 
-## Setting up postgres
+## Setting up postgres with AGE and `pg_vector`
+Installing postgres with extensions is easy to do. If you are not sure you could ask ChatGPT.
 
-### pg_vector
+In funkyprompt if you have added any language model key, for example, using jupyter to render the response, something like this will provide the steps (should be a quick setup)
 
-This just needs the extension and you can also check the [readme](https://github.com/pgvector/pgvector) for how this works. Cone and make the repo and
-```sql
-CREATE EXTENSION vector;
+```python
+import funkyprompt
+from IPython.display import Markdown
+#use whatever question works for your context
+Markdown(funkyprompt.run('how can i install postgres on the mac (homebrew) along with AGE graph extension and pg_vector extension'))
+#if you have done this run `funkyprompt.init()` or `funkyprompt init` in terminal
 ```
 
-## AGE
 
-We also use AGE graph as both the graph database and a simple key-value or rather node lookup. All entities are registered as nodes.
-In future we may use a redis cache or something like that to take the load off.
-
-Using the Git repo or these [docs](https://age.apache.org/getstarted/quickstart/) again make the project and add the extension
-
-```sql
-CREATE EXTENSION age;
-```
+ 
